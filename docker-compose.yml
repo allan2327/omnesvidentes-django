@@ -2,8 +2,32 @@ version: '2'
 services:
   db:
     image: postgres
+    environment:
+      - PGDATA = /var/lib/postgresql/data
     volumes:
-      - ./dbdata:/var/lib/postgresql/data
+      - data:/var/lib/postgresql/data
+  rabbit:
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  celery:
+    build: .
+    environment:
+      - C_FORCE_ROOT=true
+      - DATABASE_HOST=db
+      - BROKER_URL=amqp://guest:guest@rabbit:5672//
+    working_dir: /code
+    command: bash -c "sleep 3 && celery worker -A omnesvidentes.celery -Q default -n default@%h"
+    volumes:
+      - ./code:/code
+    depends_on:
+      - db
+      - rabbit
+      - redis
+
+  redis:
+    image: redis
 
   web:
     build: .
@@ -14,3 +38,27 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - rabbit
+      - celery
+      - flower
+      - redis
+
+  flower:
+    build: .
+    environment:
+      - C_FORCE_ROOT=true
+      - DATABASE_HOST=db
+      - BROKER_URL=amqp://guest:guest@rabbit:5672//
+    working_dir: /code
+    command: bash -c "sleep 3 && celery -A omnesvidentes.celery -Q default flower --port=5555 --broker=amqp://guest:guest@rabbit:5672// --broker_api=http://guest:guest@rabbit:15672/api/" 
+    volumes:
+      - ./code:/code
+    ports:
+      - "5555:5555"
+    links:
+      - db
+      - rabbit
+    restart: always
+
+volumes:
+  data: {}

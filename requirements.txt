@@ -1,4 +1,9 @@
 Django
 psycopg2
 celery
+flower
 django-celery
+lxml
+nltk
+kombu
+redis

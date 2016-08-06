@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>News Listing</title>
+  </head>
+  <body>
+    <h1>All Stories</h1>
+    <ul>
+    {% for newsitem in newsitems %}
+      <li>
+        <h2><a href="{{ newsitem.link }}" target="_blank">{{ newsitem.title }}</a></h2>
+        <small>{{ newsitem.source }}</small>
+        <p>{{ newsitem.content_snippet }}</p>
+      </li>
+    {% endfor %}
+    </ul>
+  </body>
+</html>

@@ -1,12 +1,9 @@
 from __future__ import absolute_import
 from celery import shared_task
-
+import newsfetch
 import gnp.gnp as gnp
-import nltk
-import codecs
-import json
+import hashlib
 
-@shared_task
 def getNews(q):
     news = gnp.get_google_news_query(q=q)
     stories = news['stories']
@@ -19,9 +16,15 @@ def getNews(q):
         formattedStories.append(story)
     return formattedStories
 
-@shared_task
-def getNewsTopics(topics):
-    allStories = []
+@shared_task()
+def getAllNews():
+    topics = newsfetch.models.Topic.objects.all()
     for topic in topics:
-        allStories.append(getNews(topic))
-    return allStories
+        stories = getNews(q = topic.query_text)
+        for story in stories:
+            obj = newsfetch.models.NewsItem(topic = topic,newscategory = story['category'],content_snippet = story['content_snippet'],link = story['link'],source = story['source'],title = story['title'])
+            obj.md5hash = hashlib.md5(obj.link.encode()).hexdigest()
+            # Check if hash exists in db before saving (avoid duplicates)!
+            if newsfetch.models.NewsItem.objects.filter(md5hash = obj.md5hash, topic = topic).__len__() == 0:
+                obj.save()
+    return True
