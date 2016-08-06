@@ -30,7 +30,7 @@ class NewsItemAdmin(admin.ModelAdmin):
     def get_fetcher_name(self, obj):
         return obj.topic.category.fetcher.fetcher_name
 
-    list_display = ['title', 'source', 'newscategory','get_category_name','get_fetcher_name','updated', 'rating']
+    list_display = ['title', 'source', 'newscategory','get_category_name','get_fetcher_name','date', 'rating']
 
 admin.site.register(Fetcher)
 admin.site.register(Category, CategoryAdmin)

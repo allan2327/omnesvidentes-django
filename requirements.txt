@@ -7,3 +7,5 @@ lxml
 nltk
 kombu
 redis
+django-zurb-foundation
+parsedatetime

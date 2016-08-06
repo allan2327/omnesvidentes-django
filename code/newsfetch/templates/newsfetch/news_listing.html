@@ -1,17 +1,28 @@
-<html>
-  <head>
-    <title>News Listing</title>
-  </head>
-  <body>
-    <h1>All Stories</h1>
-    <ul>
-    {% for newsitem in newsitems %}
-      <li>
-        <h2><a href="{{ newsitem.link }}" target="_blank">{{ newsitem.title }}</a></h2>
-        <small>{{ newsitem.source }}</small>
-        <p>{{ newsitem.content_snippet }}</p>
-      </li>
-    {% endfor %}
-    </ul>
-  </body>
-</html>
+{% extends "foundation/base.html" %}
+{% block base_body %}
+
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+          <h1>All Stories</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+          <ul>
+          {% for newsitem in newsitems %}
+            <li>
+              <h2><a href="{{ newsitem.link }}" target="_blank">{{ newsitem.title }}</a></h2>
+              <small>{{ newsitem.source }}</small>
+              <p>{{ newsitem.content_snippet }}</p>
+            </li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+{% endblock base_body %}
