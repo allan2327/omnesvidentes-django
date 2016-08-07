@@ -1,7 +1,10 @@
 FROM python:3-alpine
 
 # Install Packages for Building Python Packages:
+RUN echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
+
 RUN apk add --update --virtual=.build-dependencies alpine-sdk nodejs ca-certificates musl-dev gcc python-dev make cmake g++ postgresql-dev libxml2-dev libxslt-dev
+RUN apk add --update openblas-dev@testing
 
 # Install Packages needed for runtime
 RUN apk add --update postgresql-client git bash libxslt libxml2

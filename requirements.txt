@@ -13,4 +13,5 @@ djangorestframework
 django-filter
 django-crispy-forms
 numpy
+scipy
 scikit-learn
