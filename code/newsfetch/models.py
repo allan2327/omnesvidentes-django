@@ -37,6 +37,8 @@ class NewsItem(models.Model):
     md5hash = models.CharField(max_length=200)
     date = models.DateTimeField()
     updated = models.DateField(auto_now=True)
-    rating = models.DecimalField(max_digits=3,decimal_places=1,null=True, blank=True)
+    rating = models.DecimalField(max_digits=3,decimal_places=1,null=True, blank=True,default=-1)
+    modelrating = models.DecimalField(max_digits=3,decimal_places=1,null=True, blank=True,default=-1)
+
     def __str__(self):
         return self.title

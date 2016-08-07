@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'newsfetch',
     'newsclassify',
     'foundation',
+    'rest_framework',
+    'crispy_forms',
+    'djcelery',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +139,15 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT=['json']
 CELERY_TIMEZONE = 'America/Edmonton'
 CELERY_ENABLE_UTC = True
+
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+# Rest framework
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
+}

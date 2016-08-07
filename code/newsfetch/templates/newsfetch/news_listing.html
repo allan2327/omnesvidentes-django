@@ -11,17 +11,17 @@
 
     <div class="row">
       <div class="large-12 columns">
-      	<div class="panel">
-          <ul>
+          <ul class="small-block-grid-1 medium-block-grid-1 large-block-grid-1">
           {% for newsitem in newsitems %}
             <li>
-              <h2><a href="{{ newsitem.link }}" target="_blank">{{ newsitem.title }}</a></h2>
-              <small>{{ newsitem.source }}</small>
+              <strong><a href="{{ newsitem.link }}" target="_blank">{{ newsitem.title }}</a></strong>
+              <p><em>{{ newsitem.source }} - {{ newsitem.date }}</em></br>
+                <small>{{ newsitem.newscategory }}</small></p>
               <p>{{ newsitem.content_snippet }}</p>
+              <hr />
             </li>
           {% endfor %}
           </ul>
-        </div>
       </div>
     </div>
 

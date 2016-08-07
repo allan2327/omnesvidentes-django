@@ -9,3 +9,8 @@ kombu
 redis
 django-zurb-foundation
 parsedatetime
+djangorestframework
+django-filter
+django-crispy-forms
+numpy
+scikit-learn
