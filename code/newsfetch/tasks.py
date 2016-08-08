@@ -2,8 +2,11 @@ from __future__ import absolute_import
 from celery import shared_task
 from nltk import word_tokenize,WordNetLemmatizer,NaiveBayesClassifier,classify,MaxentClassifier,DecisionTreeClassifier
 from nltk.corpus import stopwords
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_extraction import DictVectorizer
+from decimal import Decimal
 import re, hashlib, datetime, parsedatetime, random
+from datetime import datetime, timedelta, time
 import newsfetch
 import gnp.gnp as gnp
 
@@ -50,32 +53,61 @@ def text_features(txt):
 
 @shared_task()
 def buildClassifier():
-    # TODO build one classifier for each topic; requires more training data though!
-    stories = newsfetch.models.NewsItem.objects.filter(rating__gte = 0)
-    storydata = []
+    categories = newsfetch.models.Category.objects.all()
+    print("Running News Rating Model: ")
+    for category in categories:
+        topics = newsfetch.models.Topic.objects.filter(category = category)
+        stories = newsfetch.models.NewsItem.objects.filter(rating__gte = 0, topic__in = topics)
+        if not stories:
+            print('- Not enough training data for '+category.category_name)
+            stories = newsfetch.models.NewsItem.objects.filter(topic = topic)
+            for story in stories:
+                story.modelrating = Decimal(-1.0)
+                story.save()
+        else:
+            print('- Training Classifier for '+category.category_name+' ('+category.fetcher.fetcher_name + ')')
+            storydata = []
+            for story in stories:
+                storydata.append([story.title + story.content_snippet, story.rating])
+
+            random.shuffle(storydata)
+            featuresets = [text_features(n[0]) for n in storydata]
+            featuresets_y = [n[1] for n in storydata]
+
+            vec = DictVectorizer()
+            featuresets_vectorized = vec.fit_transform(featuresets)
+
+            #size = int(len(featuresets) * 0.35)
+            #train_set, test_set = featuresets[size:], featuresets[:size]
+            #classifier = NaiveBayesClassifier.train(train_set)
+            #classifier = DecisionTreeClassifier.train(featuresets)
+            clf = RandomForestRegressor(n_estimators=10)
+            clf = clf.fit(featuresets_vectorized,featuresets_y)
+            print("  * score: "+str(clf.score(featuresets_vectorized,featuresets_y)))
+
+            #print('accuracy: '+ str(classify.accuracy(classifier,test_set)))
+            #classifier.show_most_informative_features(30)
+            #print('labels:'+str(classifier.labels()))
+
+            # Predict for all items!
+            topics = newsfetch.models.Topic.objects.filter(category = category)
+            stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics)
+            print("  * predicting score for all items.")
+
+            for story in stories:
+                featset = text_features(story.title + story.content_snippet)
+                featset_vectorized = vec.transform(featset)
+                story.modelrating = Decimal(clf.predict(featset_vectorized)[0])
+                story.save()
+
+    return(True)
+
+@shared_task()
+def displayNews(category):
+    categories = newsfetch.models.Category.objects.filter(category_name = category)
+    topics = newsfetch.models.Topic.objects.filter(category__in = categories)
+    # TODO: Filter by Date, limit to a smaller dataset...
+    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.0,date__gte = datetime.now().date()-timedelta(7), date__lte=datetime.now().date())
     for story in stories:
-        #print(story.title)
-        storydata.append([story.title + story.content_snippet, story.rating])
-
-    random.shuffle(storydata)
-    featuresets = [(text_features(n),rat) for (n,rat) in storydata]
-
-    size = int(len(featuresets) * 0.35)
-    train_set, test_set = featuresets[size:], featuresets[:size]
-    #classifier = NaiveBayesClassifier.train(train_set)
-    #classifier = DecisionTreeClassifier.train(featuresets)
-    clf = RandomForestClassifier(n_estimators=10)
-    clf = clf.fit(featuresets)
-
-    print('accuracy: '+ str(classify.accuracy(classifier,test_set)))
-    #classifier.show_most_informative_features(30)
-    #print('labels:'+str(classifier.labels()))
-
-    # Predict for all items!
-    stories = newsfetch.models.NewsItem.objects.all()
-    for story in stories:
-        featset = text_features(story.title + story.content_snippet)
-        story.modelrating = classifier.classify(featset)
-        story.save()
-
+        print(story.title)
     return(True)

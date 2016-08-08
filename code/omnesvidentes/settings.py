@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'newsfetch',
-    'newsclassify',
     'foundation',
     'rest_framework',
     'crispy_forms',
