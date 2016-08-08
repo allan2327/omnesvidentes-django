@@ -7,6 +7,6 @@ def index(request):
 
 def news_listing(request):
     """A view of all news items."""
-    newsitems = models.NewsItem.objects.all().order_by('-date')
+    newsitems = models.NewsItem.objects.filter(modelrating__gte=3.0).order_by('-date')
 
     return render(request, 'newsfetch/news_listing.html', {'newsitems': newsitems})

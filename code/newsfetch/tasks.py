@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction import DictVectorizer
 from decimal import Decimal
 import re, hashlib, datetime, parsedatetime, random
-from datetime import datetime, timedelta, time
+from datetime import timedelta, time
 import newsfetch
 import gnp.gnp as gnp
 
@@ -107,7 +107,7 @@ def displayNews(category):
     categories = newsfetch.models.Category.objects.filter(category_name = category)
     topics = newsfetch.models.Topic.objects.filter(category__in = categories)
     # TODO: Filter by Date, limit to a smaller dataset...
-    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.0,date__gte = datetime.now().date()-timedelta(7), date__lte=datetime.now().date())
+    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.0,date__gte = datetime.datetime.now().date()-timedelta(7), date__lte=datetime.datetime.now().date())
     for story in stories:
         print(story.title)
     return(True)
