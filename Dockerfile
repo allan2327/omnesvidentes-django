@@ -33,7 +33,7 @@ ADD code /code/
 
 # Add Crontab
 RUN chmod +x /code/manual_run.sh
-RUN crontab -l | { cat; echo "*/15    *       *       *       *       /bin/sh /code/manual_run.sh"; } | crontab -
+RUN crontab -l | { cat; echo "*    *       *       *       *       /bin/sh /code/manual_run.sh"; } | crontab -
 
 # Clean-up build requirements (to keep image small)
 RUN apk del glibc-i18n && \
