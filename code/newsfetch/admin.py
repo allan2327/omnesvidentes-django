@@ -24,13 +24,17 @@ class TopicAdmin(admin.ModelAdmin):
 
 class NewsItemAdmin(admin.ModelAdmin):
     model = NewsItem
+    def get_category(self, obj):
+        return obj.topic.category
 
     def get_category_name(self, obj):
         return obj.topic.category.category_name
     def get_fetcher_name(self, obj):
         return obj.topic.category.fetcher.fetcher_name
 
-    list_display = ['title', 'source', 'newscategory','get_category_name','get_fetcher_name','date', 'rating','modelrating']
+    list_display = ['title', 'source','get_category_name','get_fetcher_name','date', 'rating','modelrating', ]
+    list_filter = ['topic__category__fetcher','topic__category','newscategory', 'date','modelrating','rating','source' ]
+
 
 admin.site.register(Fetcher)
 admin.site.register(Category, CategoryAdmin)

@@ -39,6 +39,7 @@ class NewsItem(models.Model):
     updated = models.DateField(auto_now=True)
     rating = models.DecimalField(max_digits=3,decimal_places=1,null=True, blank=True,default=-1)
     modelrating = models.DecimalField(max_digits=3,decimal_places=1,null=True, blank=True,default=-1)
+    posted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

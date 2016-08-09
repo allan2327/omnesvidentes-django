@@ -31,7 +31,7 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "crond && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./code:/code
     ports:
@@ -50,7 +50,7 @@ services:
       - DATABASE_HOST=db
       - BROKER_URL=amqp://guest:guest@rabbit:5672//
     working_dir: /code
-    command: bash -c "sleep 3 && celery -A omnesvidentes.celery -Q default flower --port=5555 --broker=amqp://guest:guest@rabbit:5672// --broker_api=http://guest:guest@rabbit:15672/api/" 
+    command: bash -c "sleep 3 && celery -A omnesvidentes.celery -Q default flower --port=5555 --broker=amqp://guest:guest@rabbit:5672// --broker_api=http://guest:guest@rabbit:15672/api/"
     volumes:
       - ./code:/code
     ports:

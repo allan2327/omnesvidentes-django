@@ -31,6 +31,10 @@ RUN pip install -r requirements.txt; rm requirements.txt
 RUN python -m nltk.downloader stopwords punkt wordnet
 ADD code /code/
 
+# Add Crontab
+RUN chmod +x /code/manual_run.sh
+RUN crontab -l | { cat; echo "*/15    *       *       *       *       /bin/sh /code/manual_run.sh"; } | crontab -
+
 # Clean-up build requirements (to keep image small)
 RUN apk del glibc-i18n && \
   apk del .build-dependencies && \

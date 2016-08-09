@@ -8,7 +8,9 @@ from decimal import Decimal
 import re, hashlib, datetime, parsedatetime, random
 from datetime import timedelta, time
 import newsfetch
+from . import secrets
 import gnp.gnp as gnp
+from slacker import Slacker
 
 commonwords = stopwords.words('english')
 wordlemmatizer = WordNetLemmatizer()
@@ -104,10 +106,15 @@ def buildClassifier():
 
 @shared_task()
 def displayNews(category):
+    slack = Slacker(newsfetch.secrets.SLACK_TOKEN)
+
     categories = newsfetch.models.Category.objects.filter(category_name = category)
     topics = newsfetch.models.Topic.objects.filter(category__in = categories)
     # TODO: Filter by Date, limit to a smaller dataset...
-    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.0,date__gte = datetime.datetime.now().date()-timedelta(7), date__lte=datetime.datetime.now().date())
+    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.5,date__gte = datetime.datetime.now().date()-timedelta(1), date__lte=datetime.datetime.now().date(), posted=False).order_by('-modelrating')[:5]
     for story in stories:
-        print(story.title)
+        #print(story.title)
+        slack.chat.post_message(channel = '#news', text = story.title + '\n<'+story.link +'>\n'+story.content_snippet,username=story.source)
+        story.posted = True
+        story.save()
     return(True)
