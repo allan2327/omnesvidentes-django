@@ -110,11 +110,19 @@ def displayNews(category):
 
     categories = newsfetch.models.Category.objects.filter(category_name = category)
     topics = newsfetch.models.Topic.objects.filter(category__in = categories)
-    # TODO: Filter by Date, limit to a smaller dataset...
-    stories = newsfetch.models.NewsItem.objects.filter(topic__in = topics, modelrating__gte = 3.5,date__gte = datetime.datetime.now().date()-timedelta(1), date__lte=datetime.datetime.now().date(), posted=False).order_by('-modelrating')[:5]
-    for story in stories:
-        #print(story.title)
-        slack.chat.post_message(channel = '#news', text = story.title + '\n<'+story.link +'>\n'+story.content_snippet,username=story.source)
-        story.posted = True
-        story.save()
+    poststories = newsfetch.models.NewsItem.objects.filter(
+        topic__in = topics,
+        modelrating__gt = 3.0,
+        date__gte = datetime.datetime.now().date()-timedelta(1),
+        date__lte=datetime.datetime.now().date(),
+        posted = False).order_by('-modelrating')[:5]
+
+    if not poststories:
+        print("No stories found to post.")
+    else:
+        for story in poststories:
+            #print(story.title)
+            slack.chat.post_message(channel = story.topic.category.category_name, text = story.title + '\n<'+story.link +'>\n'+story.content_snippet,username=story.source)
+            story.posted = True
+            story.save()
     return(True)
